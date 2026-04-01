@@ -5,196 +5,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desafio do Saber - Mapeamento Real</title>
     <style>
-       /* 1. CONFIGURAÇÕES GERAIS E RESET */
+    /* 1. RESET E BASE */
 * {
     box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent; /* Remove o brilho ao tocar no telemóvel */
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    margin: 0;
-    padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #2c3e50;
+    background-color: #1a252f; /* Azul escuro profundo */
     color: white;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    overflow-x: hidden;
+    min-height: 100vh;
+    padding: 15px;
 }
 
-/* 2. CONTAINER DO JOGO (RESPONSIVO) */
+/* 2. WRAPPER PRINCIPAL (CONTROLA O LAYOUT LADO A LADO) */
+.main-wrapper {
+    display: flex;
+    flex-direction: row; /* Lado a lado por padrão */
+    flex-wrap: wrap;    /* Permite quebra de linha em ecrãs pequenos */
+    justify-content: center;
+    align-items: stretch;
+    gap: 20px;
+    width: 100%;
+    max-width: 1250px;
+}
+
+/* 3. CONTAINER DO TABULEIRO */
 #game-container {
     position: relative;
-    width: 95vw; /* Ocupa quase toda a largura no telemóvel */
-    max-width: 1000px; /* Tamanho máximo no PC */
-    aspect-ratio: 1000 / 605; /* Mantém a proporção da imagem original */
-    background-image: url('tabuleiro.png'); /* Garanta que o nome do arquivo está correto */
+    flex: 2; /* Ocupa 2 partes do espaço */
+    min-width: 300px;
+    max-width: 850px;
+    aspect-ratio: 1000 / 605; /* Proporção exata da sua imagem */
+    background-image: url('tabuleiro.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    margin: 20px auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border-radius: 8px;
-    user-select: none;
-    touch-action: manipulation;
-}
-
-/* 3. PEÕES (ADAPTÁVEIS) */
-.pawn {
-    position: absolute;
-    width: 2.5vw; 
-    height: 2.5vw;
-    max-width: 22px;
-    max-height: 22px;
-    min-width: 12px;
-    min-height: 12px;
-    border-radius: 50%;
-    border: 2px solid white;
-    z-index: 100;
-    transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-}
-
-/* 4. PAINEL DE CONTROLO (INTERFACE) */
-#ui-panel {
-    width: 95vw;
-    max-width: 600px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 15px;
+    background-color: #2c3e50;
     border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    overflow: hidden; /* Garante que nada saia das bordas arredondadas */
+}
+
+/* 4. PAINEL DE CONTROLOS (LATERAL/INFERIOR) */
+#ui-panel {
+    flex: 0.8; /* Ocupa uma parte menor que o tabuleiro */
+    min-width: 280px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 25px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    backdrop-filter: blur(5px);
-    margin-bottom: 20px;
 }
 
-.player-info {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
+/* 5. ELEMENTOS DE INTERFACE */
 #dice-val {
-    font-size: 2.5rem;
+    font-size: 5rem;
     margin: 10px 0;
-    display: block;
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
+    transition: transform 0.2s;
+}
+
+#p-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#p-points {
+    font-size: 1.2rem;
+    color: #ecf0f1;
+    background: rgba(0,0,0,0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin-bottom: 25px;
 }
 
 button#btn-roll {
     background-color: #27ae60;
     color: white;
     border: none;
-    padding: 15px 30px;
-    font-size: 1.1rem;
+    padding: 20px 40px;
+    font-size: 1.3rem;
     font-weight: bold;
-    border-radius: 10px;
+    border-radius: 15px;
     cursor: pointer;
-    box-shadow: 0 4px #1e8449;
     width: 100%;
+    box-shadow: 0 6px 0 #1e8449;
+    transition: all 0.1s ease;
 }
 
 button#btn-roll:active {
-    box-shadow: 0 2px #1e8449;
-    transform: translateY(2px);
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #1e8449;
 }
 
-/* 5. MODAL DE PERGUNTAS (MOBILE FIRST) */
+/* 6. PEÕES (DINÂMICOS) */
+.pawn {
+    position: absolute;
+    width: 2.2vw; 
+    height: 2.2vw;
+    max-width: 22px;
+    max-height: 22px;
+    min-width: 14px;
+    min-height: 14px;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 7. MODAL DE PERGUNTAS */
 #quiz-modal {
-    display: none; /* Controlado pelo JS */
+    display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 2000;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 5000;
     justify-content: center;
     align-items: center;
     padding: 20px;
 }
 
 .modal-content {
-    /* --bg-color é definida via JavaScript */
     background-color: var(--bg-color, #fff);
     width: 100%;
-    max-width: 450px;
-    padding: 25px;
-    border-radius: 25px;
+    max-width: 480px;
+    padding: 35px;
+    border-radius: 30px;
     text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-    border: 5px solid rgba(255,255,255,0.2);
-    animation: modalPop 0.3s ease-out;
-}
-
-#modal-level {
-    color: #fff;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
-    font-size: 1.4rem;
-    margin-bottom: 15px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 #modal-question {
-    background: rgba(255,255,255,0.9);
-    padding: 15px;
-    border-radius: 12px;
-    color: #222;
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 20px;
+    background: rgba(255,255,255,0.95);
+    color: #2c3e50;
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 20px 0;
+    line-height: 1.4;
 }
 
-/* 6. BOTÕES DE ALTERNATIVAS (BRANCOS COM TEXTO PRETO) */
+/* BOTÕES DE ALTERNATIVAS */
 .btn-option {
     display: block;
     width: 100%;
     background-color: #ffffff;
-    color: #000000;
+    color: #1a252f;
     border: none;
-    padding: 16px;
-    margin: 10px 0;
+    padding: 18px;
+    margin: 12px 0;
     border-radius: 12px;
-    font-size: 1rem;
-    font-weight: bold;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 0px #bdc3c7;
-    transition: all 0.1s;
+    box-shadow: 0 4px 0 #bdc3c7;
+    transition: transform 0.1s, background-color 0.2s;
 }
 
 .btn-option:active {
     transform: translateY(3px);
-    box-shadow: 0 1px 0px #bdc3c7;
+    box-shadow: 0 1px 0 #bdc3c7;
 }
 
-/* 7. ANIMAÇÕES */
-@keyframes modalPop {
-    from { transform: scale(0.8); opacity: 0; }
+/* 8. ANIMAÇÕES */
+@keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
 
-/* 8. AJUSTES PARA ECRÃS MUITO PEQUENOS (TELEMÓVEIS) */
-@media (max-width: 480px) {
+/* 9. MEDIA QUERIES (ADAPTAÇÃO FINAL) */
+@media (max-width: 900px) {
+    .main-wrapper {
+        flex-direction: column; /* No telemóvel ao alto, fica um sob o outro */
+        align-items: center;
+    }
+    
     #ui-panel {
-        padding: 10px;
-    }
-    
-    .modal-content {
-        padding: 15px;
-    }
-    
-    #modal-question {
-        font-size: 1rem;
+        width: 100%;
+        max-width: 500px;
+        order: 2; /* Garante que o painel fique abaixo do tabuleiro */
     }
 
-    .btn-option {
-        padding: 14px;
-        font-size: 0.95rem;
+    #game-container {
+        width: 100%;
+        order: 1;
     }
 }
 
-/* 9. MODO PAISAGEM (OPCIONAL) */
 @media screen and (orientation: landscape) and (max-height: 500px) {
-    #game-container {
-        width: 80vh; /* Prioriza a altura para caber na tela deitada */
-    }
+    body { padding: 5px; }
+    #dice-val { font-size: 3rem; }
+    button#btn-roll { padding: 10px; }
 }
     </style>
 </head>
@@ -208,17 +227,19 @@ button#btn-roll:active {
 		</div>
 	</div>
 
-    <div id="game-container">
-        </div>
+    <div class="main-wrapper">
+    
+		<div id="game-container">
+			</div>
 
-    <div class="controls">
-        <div id="info-panel">
-            <b id="p-name" style="color: #f1c40f; font-size: 1.2em;">Jogador 1</b><br>
-            Pontos: <span id="p-points">0</span> / 50
-        </div>
-        <div style="font-size: 30px;" id="dice-val">🎲 ?</div>
-        <button onclick="playTurn()">Rolar Dado</button>
-    </div>
+		<div id="ui-panel">
+			<div id="p-name">Jogador 1</div>
+			<div id="p-points">0 Pontos</div>
+			<div id="dice-val">🎲</div>
+			<button id="btn-roll" onclick="playTurn()">JOGAR DADO</button>
+		</div>
+
+	</div>
 
 <script>
 // 1. MAPEAMENTO DAS CASAS (Baseado nos seus dados exatos)
